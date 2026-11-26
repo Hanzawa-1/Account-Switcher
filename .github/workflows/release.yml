@@ -1,0 +1,50 @@
+name: Release
+
+# Runs whenever something lands on main, such as a merged pull request.
+# It publishes a release only when the version in Cargo.toml doesn't have one
+# yet, so bump that version in the branch you merge to ship a new release.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+# One run at a time, so two quick merges can't both publish the same version.
+concurrency: release
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      new: ${{ steps.version.outputs.new }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          tag="v$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "$tag is already released, so there's nothing to do."
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  release:
+    needs: check
+    if: needs.check.outputs.new == 'true'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: rustup update stable --no-self-update
+      - run: cargo test
+      - run: cargo build --release
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release create ${{ needs.check.outputs.tag }} target/release/slim-steam-switch.exe --target ${{ github.sha }} --generate-notes

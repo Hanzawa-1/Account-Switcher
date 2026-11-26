@@ -7,6 +7,10 @@ fn main() {
         res.set("FileDescription", "Slim Steam Switch");
         res.set("ProductName", "Slim Steam Switch");
         if let Err(e) = res.compile() {
+            // A release (built on CI) must have its icon; a local build can go without.
+            if std::env::var_os("CI").is_some() {
+                panic!("exe icon not embedded: {e}");
+            }
             println!("cargo:warning=exe icon not embedded: {e}");
         }
     }

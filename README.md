@@ -2,6 +2,8 @@
 
 A small, portable Steam account switcher for Windows that looks like VS Code.
 
+Download `slim-steam-switch.exe` from the [latest release](https://github.com/Hanzawa-1/Account-Switcher/releases/latest) and run it. The exe isn't signed, so Windows may warn about it the first time: choose **More info**, then **Run anyway**.
+
 - Lists the Steam accounts saved on this PC, with their profile pictures and last login time.
 - Double-click an account (or select it and press Enter) to switch. Steam closes and starts again signed in to that account.
 - `+` opens Steam's sign-in screen so you can add another account.
@@ -21,3 +23,7 @@ cargo build --release
 ```
 
 The exe is `target\release\slim-steam-switch.exe`.
+
+## Release
+
+To publish a new version, bump `version` in `Cargo.toml` in the branch you merge. When it lands on `main`, GitHub Actions runs the tests, builds the exe and publishes it as release `vX.Y.Z`. Merges that don't change the version don't make a release.
