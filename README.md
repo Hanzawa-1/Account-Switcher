@@ -23,7 +23,3 @@ cargo build --release
 ```
 
 The exe is `target\release\slim-steam-switch.exe`.
-
-## Release
-
-To publish a new version, bump `version` in `Cargo.toml` in the branch you merge. When it lands on `main`, GitHub Actions runs the tests, builds the exe and publishes it as release `vX.Y.Z`. Merges that don't change the version don't make a release.
